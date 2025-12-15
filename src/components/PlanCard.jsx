@@ -1,40 +1,30 @@
-function PlanCard({ place }) {
+import { Link } from "react-router-dom";
+
+function PlanCard({ plan }) {
   return (
-    <article className="plan-card">
-      {/* Imagen principal */}
+    <div className="card h-100 shadow-sm">
       <img
-        src={place.coverImg}
-        alt={place.name}
-        className="plan-image"
+        src={plan.coverImg}
+        className="card-img-top"
+        alt={plan.name}
+        style={{ height: "220px", objectFit: "cover" }}
       />
 
-      <h2>{place.name}</h2>
-      <p className="plan-description">{place.description}</p>
+      <div className="card-body d-flex flex-column">
+        <h5 className="card-title">{plan.name}</h5>
 
-      {/* EXPERIENCIAS */}
-      <h3>Experiences</h3>
-      <ul>
-        {place.experiencias &&
-          Object.values(place.experiencias).map((exp, index) => (
-            <li key={index}>
-              <strong>{exp.title}</strong> – {exp.text}
-            </li>
-          ))}
-      </ul>
+        <p className="card-text text-muted">
+          {plan.description.slice(0, 90)}...
+        </p>
 
-      {/* LUGARES PARA COMER */}
-      <h3>Places to eat</h3>
-      <div className="food-list">
-        {place.lugaresParaComer &&
-          Object.values(place.lugaresParaComer).map((food, index) => (
-            <div key={index} className="food-card">
-              <img src={food.img} alt={food.name} />
-              <p> <strong>{food.name}</strong></p>
-              <p>{food.note}</p>
-            </div>
-          ))}
+        <Link
+          to={`/plans/${plan.id}`}
+          className="btn btn-outline-primary mt-auto"
+        >
+          View details
+        </Link>
       </div>
-    </article>
+    </div>
   );
 }
 

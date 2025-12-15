@@ -1,9 +1,23 @@
 import axios from "axios";
 
 const BASE_URL =
-  "https://planora-a08d1-default-rtdb.europe-west1.firebasedatabase.app";
+  "https://planora-a08d1-default-rtdb.europe-west1.firebasedatabase.app/places";
 
-export const getPlaces = async () => {
-  const response = await axios.get(`${BASE_URL}/places.json`);
-  return response.data; // OJO: objeto, no array
+export const getAllPlans = async () => {
+  const response = await axios.get(`${BASE_URL}.json`);
+  return Object.entries(response.data).map(([id, data]) => ({
+    id,
+    ...data,
+  }));
+};
+
+export const getPlanById = async (id) => {
+  const response = await axios.get(`${BASE_URL}/${id}.json`);
+  return response.data;
+};
+
+export const createPlan = async (planData) => {
+  const response = await axios.post(`${BASE_URL}.json`, planData);
+  // Firebase RTDB devuelve { name: "generatedId" }
+  return response.data.name;
 };

@@ -7,15 +7,19 @@ function PlanDetails() {
   const [plan, setPlan] = useState(null);
 
   useEffect(() => {
-    loadPlan();
-  }, []);
+    if (planId) {
+      loadPlan();
+    }
+  }, [planId]);
 
   const loadPlan = async () => {
     const data = await getPlanById(planId);
     setPlan(data);
   };
 
-  if (!plan) return <p className="text-center mt-5">Loading...</p>;
+  if (!plan) {
+    return <p className="text-center mt-5">Loading...</p>;
+  }
 
   return (
     <div className="container my-5">
@@ -34,37 +38,45 @@ function PlanDetails() {
       <hr />
 
       {/* EXPERIENCES */}
-      <h4>Experiences</h4>
-      <ul>
-        {plan.experiencias.map((exp, index) => (
-          <li key={index}>
-            <strong>{exp.title}:</strong> {exp.text}
-          </li>
-        ))}
-      </ul>
-
-      <hr />
+      {plan.experiencias && plan.experiencias.length > 0 && (
+        <>
+          <h4>Experiences</h4>
+          <ul>
+            {plan.experiencias.map((exp, index) => (
+              <li key={index}>
+                <strong>{exp.title}:</strong> {exp.text}
+              </li>
+            ))}
+          </ul>
+          <hr />
+        </>
+      )}
 
       {/* PLACES TO EAT */}
-      <h4>Places to eat</h4>
+      {plan.lugaresParaComer && plan.lugaresParaComer.length > 0 && (
+        <>
+          <h4>Places to eat</h4>
 
-      <div className="row g-3">
-        {plan.lugaresParaComer.map((place, index) => (
-          <div className="col-md-6" key={index}>
-            <div className="card h-100">
-              <img
-                src={place.img}
-                className="card-img-top"
-                style={{ height: "180px", objectFit: "cover" }}
-              />
-              <div className="card-body">
-                <h6>{place.name}</h6>
-                <p className="text-muted">{place.note}</p>
+          <div className="row g-3">
+            {plan.lugaresParaComer.map((place, index) => (
+              <div className="col-md-6" key={index}>
+                <div className="card h-100">
+                  <img
+                    src={place.img}
+                    alt={place.name}
+                    className="card-img-top"
+                    style={{ height: "180px", objectFit: "cover" }}
+                  />
+                  <div className="card-body">
+                    <h6>{place.name}</h6>
+                    <p className="text-muted">{place.note}</p>
+                  </div>
+                </div>
               </div>
-            </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </>
+      )}
 
     </div>
   );

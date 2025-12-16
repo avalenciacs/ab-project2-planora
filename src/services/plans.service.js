@@ -5,9 +5,12 @@ const BASE_URL =
 
 export const getAllPlans = async () => {
   const response = await axios.get(`${BASE_URL}.json`);
-  return Object.entries(response.data).map(([id, data]) => ({
+
+  if (!response.data) return [];
+
+  return Object.entries(response.data).map(([id, plan]) => ({
     id,
-    ...data,
+    ...plan,
   }));
 };
 

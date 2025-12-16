@@ -37,14 +37,12 @@ input, textarea, select {
   object-fit: cover;
 }
 
-/* Limitar descripción en Home */
+
 .plan-card .card-text {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  max-height: 3em;        
+  line-height: 1.5em;
   overflow: hidden;
 }
-
 .food-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));

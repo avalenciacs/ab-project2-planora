@@ -24,3 +24,9 @@ export const createPlan = async (planData) => {
   // Firebase RTDB devuelve { name: "generatedId" }
   return response.data.name;
 };
+
+export const updateVotes = async (id, newVotes) => {
+  await axios.patch(`${BASE_URL}/${id}.json`, {
+    votes: newVotes,
+  });
+};

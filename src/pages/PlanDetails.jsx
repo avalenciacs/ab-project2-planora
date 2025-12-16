@@ -1,20 +1,19 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { getPlanById } from "../services/plans.service";
-
-
+import { getPlanById, updateVotes } from "../services/plans.service";
 
 function PlanDetails() {
   const { id } = useParams();
   const [plan, setPlan] = useState(null);
+  const [hasVoted, setHasVoted] = useState(false);
 
   useEffect(() => {
     loadPlan();
+
+    const votedPlans = JSON.parse(localStorage.getItem("votedPlans")) || [];
+    setHasVoted(votedPlans.includes(id));
   }, [id]);
 
-
-
-  
   const loadPlan = async () => {
     const data = await getPlanById(id);
     setPlan(data);
@@ -24,18 +23,47 @@ function PlanDetails() {
     return <p className="text-center mt-5">Loading plan...</p>;
   }
 
-  // Convertimos actividades (objeto) a array
   const activities = plan.actividades
     ? Object.values(plan.actividades)
     : [];
 
-  const experiences = activities.filter(a => a.type === "experience");
-  const food = activities.filter(a => a.type === "food");
+  const handleVote = async () => {
+    if (hasVoted) return;
+
+    const newVotes = (plan.votes || 0) + 1;
+    await updateVotes(id, newVotes);
+
+    setPlan({ ...plan, votes: newVotes });
+
+    const votedPlans = JSON.parse(localStorage.getItem("votedPlans")) || [];
+    localStorage.setItem(
+      "votedPlans",
+      JSON.stringify([...votedPlans, id])
+    );
+
+    setHasVoted(true);
+  };
+
+  const handleUnvote = async () => {
+    if (!hasVoted) return;
+
+    const newVotes = Math.max((plan.votes || 0) - 1, 0);
+    await updateVotes(id, newVotes);
+
+    setPlan({ ...plan, votes: newVotes });
+
+    const votedPlans = JSON.parse(localStorage.getItem("votedPlans")) || [];
+    localStorage.setItem(
+      "votedPlans",
+      JSON.stringify(votedPlans.filter(pid => pid !== id))
+    );
+
+    setHasVoted(false);
+  };
 
   return (
     <div className="container my-5">
 
-      {/* HERO IMAGE */}
       <img
         src={plan.coverImg}
         alt={plan.name}
@@ -43,53 +71,50 @@ function PlanDetails() {
         style={{ maxHeight: "450px", width: "100%", objectFit: "cover" }}
       />
 
-      <h1 className="mb-2">{plan.name}</h1>
+      <h1>{plan.name}</h1>
       <p className="text-muted">{plan.description}</p>
+
+      {/* VOTES */}
+      <div className="d-flex align-items-center gap-3 mb-4">
+        <span className="fs-5">⭐ {plan.votes || 0} votes</span>
+
+        {!hasVoted ? (
+          <button className="btn btn-outline-primary" onClick={handleVote}>
+            👍 Vote
+          </button>
+        ) : (
+          <button className="btn btn-outline-danger" onClick={handleUnvote}>
+            👎 Remove vote
+          </button>
+        )}
+      </div>
 
       <hr />
 
-      {/* EXPERIENCES */}
-      {experiences.length > 0 && (
-        <>
-          <h4>Experiences</h4>
-          <ul>
-            {experiences.map((exp, index) => (
-              <li key={index}>
-                <strong>{exp.title}:</strong> {exp.description}
-              </li>
-            ))}
-          </ul>
-          <hr />
-        </>
-      )}
+      <h4>Activities</h4>
 
-      {/* FOOD */}
-      {food.length > 0 && (
-        <>
-          <h4>Places to eat</h4>
-
-          <div className="row g-3">
-            {food.map((place, index) => (
-              <div className="col-md-6" key={index}>
-                <div className="card h-100">
-                  {place.img && (
-                    <img
-                      src={place.img}
-                      className="card-img-top"
-                      style={{ height: "180px", objectFit: "cover" }}
-                      alt={place.title}
-                    />
-                  )}
-                  <div className="card-body">
-                    <h6>{place.title}</h6>
-                    <p className="text-muted">{place.description}</p>
-                  </div>
-                </div>
+      <div className="row g-4">
+        {activities.map((act, index) => (
+          <div className="col-md-4" key={index}>
+            <div className="card h-100">
+              {act.img && (
+                <img
+                  src={act.img}
+                  className="card-img-top"
+                  style={{ height: "180px", objectFit: "cover" }}
+                />
+              )}
+              <div className="card-body">
+                <span className="badge bg-secondary mb-2">
+                  {act.type}
+                </span>
+                <h5>{act.title}</h5>
+                <p className="text-muted">{act.description}</p>
               </div>
-            ))}
+            </div>
           </div>
-        </>
-      )}
+        ))}
+      </div>
 
     </div>
   );

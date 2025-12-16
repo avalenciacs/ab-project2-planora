@@ -1,326 +1,200 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { createPlan } from "../services/plans.service";
+import axios from "axios";
+
+const BASE_URL =
+  "https://planora-a08d1-default-rtdb.europe-west1.firebasedatabase.app/places";
+
+const ACTIVITY_TYPES = [
+  "food",
+  "experience",
+  "culture",
+  "nature",
+  "nightlife",
+];
 
 function CreatePlan() {
   const navigate = useNavigate();
 
-  // campos base
+  // PLAN INFO
   const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
+  const [country, setCountry] = useState("");
+  const [city, setCity] = useState("");
   const [coverImg, setCoverImg] = useState("");
+  const [description, setDescription] = useState("");
 
-  // arrays dinámicos
-  const [experiencias, setExperiencias] = useState([{ title: "", text: "" }]);
-  const [lugaresParaComer, setLugaresParaComer] = useState([
-    { name: "", img: "", note: "" },
-  ]);
+  // ACTIVITIES
+  const [activities, setActivities] = useState([]);
 
-  // UI estado
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState("");
-
-  // helpers: experiencias
-  const addExperience = () =>
-    setExperiencias((prev) => [...prev, { title: "", text: "" }]);
-
-  const removeExperience = (index) =>
-    setExperiencias((prev) => prev.filter((_, i) => i !== index));
-
-  const updateExperience = (index, field, value) => {
-    setExperiencias((prev) =>
-      prev.map((item, i) => (i === index ? { ...item, [field]: value } : item))
-    );
+  const addActivity = () => {
+    setActivities([
+      ...activities,
+      { type: "", title: "", description: "", img: "" },
+    ]);
   };
 
-  // helpers: lugares
-  const addPlace = () =>
-    setLugaresParaComer((prev) => [...prev, { name: "", img: "", note: "" }]);
+  const updateActivity = (index, field, value) => {
+    const copy = [...activities];
+    copy[index][field] = value;
+    setActivities(copy);
+  };
 
-  const removePlace = (index) =>
-    setLugaresParaComer((prev) => prev.filter((_, i) => i !== index));
-
-  const updatePlace = (index, field, value) => {
-    setLugaresParaComer((prev) =>
-      prev.map((item, i) => (i === index ? { ...item, [field]: value } : item))
-    );
+  const removeActivity = (index) => {
+    setActivities(activities.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
 
-    // limpieza: quitamos filas vacías
-    const cleanExperiencias = experiencias
-      .map((x) => ({ title: x.title.trim(), text: x.text.trim() }))
-      .filter((x) => x.title && x.text);
+    // 1️⃣ Create plan
+    const planResponse = await axios.post(`${BASE_URL}.json`, {
+      name,
+      country,
+      city: city.toLowerCase(),
+      coverImg,
+      description,
+      votes: 0,
+    });
 
-    const cleanLugares = lugaresParaComer
-      .map((x) => ({
-        name: x.name.trim(),
-        img: x.img.trim(),
-        note: x.note.trim(),
-      }))
-      .filter((x) => x.name && x.img && x.note);
+    const planId = planResponse.data.name;
 
-    if (!name.trim() || !description.trim() || !coverImg.trim()) {
-      setError("Completa Name, Description y Cover image URL.");
-      return;
+    // 2️⃣ Create activities
+    for (let activity of activities) {
+      await axios.post(
+        `${BASE_URL}/${planId}/actividades.json`,
+        activity
+      );
     }
 
-    const newPlan = {
-      name: name.trim(),
-      description: description.trim(),
-      coverImg: coverImg.trim(),
-      experiencias: cleanExperiencias,
-      lugaresParaComer: cleanLugares,
-    };
-
-    try {
-      setSaving(true);
-      const createdId = await createPlan(newPlan);
-      // ir al details del nuevo plan
-      navigate(`/plans/${createdId}`);
-    } catch (err) {
-      console.error(err);
-      setError("Error creando el plan (revisa consola / permisos Firebase).");
-    } finally {
-      setSaving(false);
-    }
+    // 3️⃣ Go to details
+    navigate(`/plans/${planId}`);
   };
 
   return (
-    <div className="container my-5" style={{ maxWidth: 980 }}>
-      <div className="d-flex align-items-center justify-content-between mb-3">
-        <h2 className="m-0">Create a plan</h2>
-        <span className="badge text-bg-light border">Planora</span>
-      </div>
+    <div className="container my-5">
+      <h2>Create a new plan</h2>
 
-      {error && <div className="alert alert-danger">{error}</div>}
+      <form onSubmit={handleSubmit} className="mt-4">
 
-      <form onSubmit={handleSubmit} className="card shadow-sm border-0">
-        <div className="card-body p-4">
-          {/* Básico */}
-          <div className="row g-3">
-            <div className="col-md-6">
-              <label className="form-label">Name</label>
-              <input
-                className="form-control"
-                placeholder="Asturias"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-              />
-            </div>
+        {/* BASIC INFO */}
+        <input
+          className="form-control mb-3"
+          placeholder="Plan name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+        />
 
-            <div className="col-md-6">
-              <label className="form-label">Cover image URL (coverImg)</label>
-              <input
-                className="form-control"
-                placeholder="https://..."
-                value={coverImg}
-                onChange={(e) => setCoverImg(e.target.value)}
-                required
-              />
-              {coverImg.trim() && (
-                <div className="mt-2">
-                  <img
-                    src={coverImg}
-                    alt="preview"
-                    className="img-fluid rounded"
-                    style={{ maxHeight: 180, width: "100%", objectFit: "cover" }}
-                    onError={(e) => {
-                      e.currentTarget.style.display = "none";
-                    }}
-                    onLoad={(e) => {
-                      e.currentTarget.style.display = "block";
-                    }}
-                  />
-                </div>
-              )}
-            </div>
+        <input
+          className="form-control mb-3"
+          placeholder="Country (e.g. Spain)"
+          value={country}
+          onChange={(e) => setCountry(e.target.value)}
+          required
+        />
 
-            <div className="col-12">
-              <label className="form-label">Description</label>
-              <textarea
-                className="form-control"
-                rows="3"
-                placeholder="Naturaleza, comida, planes..."
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                required
-              />
-            </div>
-          </div>
+        <input
+          className="form-control mb-3"
+          placeholder="City (e.g. Salamanca)"
+          value={city}
+          onChange={(e) => setCity(e.target.value)}
+          required
+        />
 
-          <hr className="my-4" />
+        <input
+          className="form-control mb-3"
+          placeholder="Cover image URL"
+          value={coverImg}
+          onChange={(e) => setCoverImg(e.target.value)}
+          required
+        />
 
-          {/* EXPERIENCIAS */}
-          <div className="d-flex align-items-center justify-content-between mb-2">
-            <h5 className="m-0">Experiences</h5>
+        <textarea
+          className="form-control mb-4"
+          placeholder="Plan description"
+          rows="3"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          required
+        />
+
+        <hr />
+
+        {/* ACTIVITIES */}
+        <h4>Activities</h4>
+
+        {activities.map((activity, index) => (
+          <div key={index} className="card p-3 mb-3">
+
+            <select
+              className="form-select mb-2"
+              value={activity.type}
+              onChange={(e) =>
+                updateActivity(index, "type", e.target.value)
+              }
+              required
+            >
+              <option value="">Select type</option>
+              {ACTIVITY_TYPES.map(type => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
+
+            <input
+              className="form-control mb-2"
+              placeholder="Activity title"
+              value={activity.title}
+              onChange={(e) =>
+                updateActivity(index, "title", e.target.value)
+              }
+              required
+            />
+
+            <textarea
+              className="form-control mb-2"
+              placeholder="Activity description"
+              rows="2"
+              value={activity.description}
+              onChange={(e) =>
+                updateActivity(index, "description", e.target.value)
+              }
+              required
+            />
+
+            <input
+              className="form-control mb-2"
+              placeholder="Image URL (optional)"
+              value={activity.img}
+              onChange={(e) =>
+                updateActivity(index, "img", e.target.value)
+              }
+            />
+
             <button
               type="button"
-              className="btn btn-outline-primary btn-sm"
-              onClick={addExperience}
+              className="btn btn-outline-danger btn-sm"
+              onClick={() => removeActivity(index)}
             >
-              + Add experience
+              Remove activity
             </button>
           </div>
+        ))}
 
-          <div className="row g-3">
-            {experiencias.map((exp, idx) => (
-              <div className="col-12" key={idx}>
-                <div className="card border-0 bg-light">
-                  <div className="card-body">
-                    <div className="row g-3">
-                      <div className="col-md-4">
-                        <label className="form-label">Title</label>
-                        <input
-                          className="form-control"
-                          placeholder="Lagos de Covadonga"
-                          value={exp.title}
-                          onChange={(e) =>
-                            updateExperience(idx, "title", e.target.value)
-                          }
-                        />
-                      </div>
+        <button
+          type="button"
+          className="btn btn-outline-secondary mb-4"
+          onClick={addActivity}
+        >
+          + Add activity
+        </button>
 
-                      <div className="col-md-7">
-                        <label className="form-label">Text</label>
-                        <input
-                          className="form-control"
-                          placeholder="Paisaje de montaña espectacular..."
-                          value={exp.text}
-                          onChange={(e) =>
-                            updateExperience(idx, "text", e.target.value)
-                          }
-                        />
-                      </div>
+        <hr />
 
-                      <div className="col-md-1 d-flex align-items-end">
-                        <button
-                          type="button"
-                          className="btn btn-outline-danger w-100"
-                          onClick={() => removeExperience(idx)}
-                          disabled={experiencias.length === 1}
-                          title="Remove"
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    </div>
-                    <small className="text-muted d-block mt-2">
-                      Se guardan solo las filas completas.
-                    </small>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <hr className="my-4" />
-
-          {/* LUGARES PARA COMER */}
-          <div className="d-flex align-items-center justify-content-between mb-2">
-            <h5 className="m-0">Places to eat</h5>
-            <button
-              type="button"
-              className="btn btn-outline-primary btn-sm"
-              onClick={addPlace}
-            >
-              + Add place
-            </button>
-          </div>
-
-          <div className="row g-3">
-            {lugaresParaComer.map((p, idx) => (
-              <div className="col-12" key={idx}>
-                <div className="card border-0 bg-light">
-                  <div className="card-body">
-                    <div className="row g-3">
-                      <div className="col-md-3">
-                        <label className="form-label">Name</label>
-                        <input
-                          className="form-control"
-                          placeholder="Sidrería Tierra Astur"
-                          value={p.name}
-                          onChange={(e) =>
-                            updatePlace(idx, "name", e.target.value)
-                          }
-                        />
-                      </div>
-
-                      <div className="col-md-5">
-                        <label className="form-label">Image URL (img)</label>
-                        <input
-                          className="form-control"
-                          placeholder="https://..."
-                          value={p.img}
-                          onChange={(e) =>
-                            updatePlace(idx, "img", e.target.value)
-                          }
-                        />
-                      </div>
-
-                      <div className="col-md-3">
-                        <label className="form-label">Note</label>
-                        <input
-                          className="form-control"
-                          placeholder="cocina tradicional"
-                          value={p.note}
-                          onChange={(e) =>
-                            updatePlace(idx, "note", e.target.value)
-                          }
-                        />
-                      </div>
-
-                      <div className="col-md-1 d-flex align-items-end">
-                        <button
-                          type="button"
-                          className="btn btn-outline-danger w-100"
-                          onClick={() => removePlace(idx)}
-                          disabled={lugaresParaComer.length === 1}
-                          title="Remove"
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    </div>
-
-                    {p.img.trim() && (
-                      <div className="mt-3">
-                        <img
-                          src={p.img}
-                          alt="place preview"
-                          className="img-fluid rounded"
-                          style={{
-                            maxHeight: 160,
-                            width: "100%",
-                            objectFit: "cover",
-                          }}
-                          onError={(e) => {
-                            e.currentTarget.style.display = "none";
-                          }}
-                          onLoad={(e) => {
-                            e.currentTarget.style.display = "block";
-                          }}
-                        />
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <hr className="my-4" />
-
-          <div className="d-flex gap-2 justify-content-end">
-            <button type="submit" className="btn btn-primary" disabled={saving}>
-              {saving ? "Creating..." : "Create plan"}
-            </button>
-          </div>
-        </div>
+        <button className="btn btn-primary w-100">
+          Create plan
+        </button>
       </form>
     </div>
   );

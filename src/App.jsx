@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 import CreatePlan from "./pages/CreatePlan";
 import PlanDetails from "./pages/PlanDetails";
 import EditPlan from "./pages/EditPlan";
+import About from "./pages/About";
 
 function App() {
   const [search, setSearch] = useState("");
@@ -18,6 +19,7 @@ function App() {
         <Route path="/create" element={<CreatePlan />} />
         <Route path="/plans/:id" element={<PlanDetails />} />
         <Route path="/plans/:id/edit" element={<EditPlan />} />
+        <Route path="/about" element={<About />} />
       </Routes>
     </>
   );

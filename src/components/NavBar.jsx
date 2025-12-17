@@ -97,6 +97,13 @@ function NavBar({ search, setSearch }) {
               Create Plan
             </NavLink>
           </li>
+
+          {/* 👉 ABOUT */}
+          <li className="nav-item">
+            <NavLink className="nav-link" to="/about">
+              About
+            </NavLink>
+          </li>
         </ul>
       </div>
     </nav>

@@ -43,11 +43,12 @@ function NavBar({ search, setSearch }) {
         >
           <input
             type="text"
-            className="form-control rounded-pill text-center shadow-sm"
-            placeholder="Search by city (e.g. Málaga)"
+            className="form-control"
+            placeholder="Search by city or country (e.g. Malaga, Spain)"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
+
         </div>
       )}
 
@@ -71,11 +72,12 @@ function NavBar({ search, setSearch }) {
             <li className="nav-item d-lg-none my-3">
               <input
                 type="text"
-                className="form-control text-center"
-                placeholder="Search by city"
+                className="form-control"
+                placeholder="Search by city or country (e.g. Malaga, Spain)"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
+
             </li>
           )}
 

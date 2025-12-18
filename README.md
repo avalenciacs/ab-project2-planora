@@ -76,6 +76,11 @@ plans: {
     createdAt: 1700000000000
   }
 }
+
+
+
+
+
 This structure allows:
 
 Multiple plans per city

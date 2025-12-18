@@ -1,14 +1,6 @@
-import {
-  Link,
-  NavLink,
-  useLocation,
-  useNavigate
-} from "react-router-dom";
-import { useEffect } from "react";
-import logo from "../assets/logo.png";
-
-function NavBar({ search, setSearch }) {
-  const location = useLocation();
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { loginWithGoogle, logout } from "../services/auth.service";
   const navigate = useNavigate();
 
   const isHome = location.pathname === "/";

@@ -1,74 +1,43 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import PlanCard from "../components/PlanCard";
 import { getAllPlans } from "../services/plans.service";
 
-/*  Normalizar texto (acentos, mayúsculas) */
-const normalizeText = (text = "") => {
-  return text
+const normalize = (text = "") =>
+  text
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "");
-};
 
 function Home({ search }) {
   const [plans, setPlans] = useState([]);
 
   useEffect(() => {
-    loadPlans();
+    getAllPlans().then(setPlans);
   }, []);
 
-  const loadPlans = async () => {
-    const data = await getAllPlans();
-    setPlans(data);
-  };
+  const query = normalize(search);
+  const isSearching = query.length > 0;
 
-  const query = normalizeText(search);
-  const isSearching = query !== "";
+  const filteredPlans = useMemo(() => {
+    if (!isSearching) return plans;
 
-  /*  Filtrado por ciudad O país (sin acentos) */
-  const filteredPlans = plans.filter((plan) => {
-    const city = normalizeText(plan.city);
-    const country = normalizeText(plan.country);
-
-    return city.includes(query) || country.includes(query);
-  });
-
-  /*  Top plans por votos */
-  const topPlans = [...plans]
-    .sort((a, b) => (b.votes || 0) - (a.votes || 0))
-    .slice(0, 6);
+    return plans.filter((plan) => {
+      const city = normalize(plan.city);
+      const country = normalize(plan.country);
+      return city.includes(query) || country.includes(query);
+    });
+  }, [plans, query, isSearching]);
 
   return (
     <div className="container my-5">
-
-      {/*  TOP PLANS (solo si NO se está buscando) */}
-      {!isSearching && (
-        <>
-          <h2 className="mb-4">Top plans</h2>
-
-          <div className="row g-4 mb-5">
-            {topPlans.map((plan) => (
-              <div className="col-lg-4 col-md-6" key={plan.id}>
-                <PlanCard plan={plan} />
-              </div>
-            ))}
-          </div>
-        </>
-      )}
-
-      {/*  ALL / RESULTS */}
-      <h2 id="all-plans" className="mb-4">
+      <h2 className="mb-4">
         {isSearching ? `Results for "${search}"` : "All plans"}
       </h2>
 
-      {/*  No results */}
       {isSearching && filteredPlans.length === 0 && (
-        <p className="text-muted">
-          No plans found for "{search}"
-        </p>
+        <p className="text-muted">No results found</p>
       )}
 
-      {/*  Plans list */}
       <div className="row g-4">
         {(isSearching ? filteredPlans : plans).map((plan) => (
           <div className="col-lg-4 col-md-6" key={plan.id}>

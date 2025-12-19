@@ -9,6 +9,7 @@ import PlanDetails from "./pages/PlanDetails";
 import EditPlan from "./pages/EditPlan";        // ✅ IMPORTANTE
 import About from "./pages/About";
 import PrivateRoute from "./components/PrivateRoute";
+export const dynamic = 'force-dynamic';
 
 function App() {
   const [search, setSearch] = useState("");

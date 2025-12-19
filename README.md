@@ -108,6 +108,7 @@ RESTful API interaction
 Firebase Authentication (Google)
 
 🧑‍💻 Team & Roles
+
 👨‍🎨 Anderson Valencia
 Frontend Developer
 

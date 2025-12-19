@@ -109,8 +109,8 @@ Firebase Authentication (Google)
 
 🧑‍💻 Team & Roles
 
-👨‍🎨 Anderson Valencia
-Frontend Developer
+👨‍🎨 Anderson Valencia: 
+ Frontend Developer
 
 UI/UX design and implementation
 
@@ -126,8 +126,8 @@ Responsive design and accessibility
 
 🔗 LinkedIn: https://www.linkedin.com/in/anderson-valencia-885ba1143
 
-👨‍💻 Francisco Sorkin
-Frontend Developer (React) & Python
+👨‍💻 Francisco Sorkin: 
+ Frontend Developer (React) & Python
 
 Firebase Realtime Database design
 

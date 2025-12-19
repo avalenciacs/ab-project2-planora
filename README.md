@@ -41,14 +41,10 @@ The main goals of the project are:
 - 👍 Voting / likes system to highlight popular plans
 - 📱 Fully responsive and mobile-friendly UI
 
----
+🧩 Data Model (Firebase Realtime Database)
 
-## 🧩 Data Model  
-**Firebase Realtime Database**
+Plans are stored with a scalable and flexible structure:
 
-Plans are stored using a flexible and scalable structure:
-
-```json
 plans: {
   planId: {
     title: "Foodie weekend in Bilbao",
@@ -56,10 +52,7 @@ plans: {
     city: "Bilbao",
     coverImg: "...",
     description: "...",
-    likes: {
-      userId1: true,
-      userId2: true
-    },
+    votes: 25,
     activities: {
       a1: {
         type: "food",
@@ -76,6 +69,9 @@ plans: {
     createdAt: 1700000000000
   }
 }
+
+
+
 This structure allows:
 
 Multiple plans per city
@@ -107,6 +103,7 @@ Firebase Authentication (Google)
 
 🧑‍💻 Team & Roles
 👨‍🎨 Anderson Valencia
+
 Frontend Developer
 
 UI/UX design and implementation
@@ -122,8 +119,9 @@ Responsive design and accessibility
 🔗 GitHub: https://github.com/avalenciacs
 🔗 LinkedIn: https://www.linkedin.com/in/anderson-valencia-885ba1143
 
-👨‍💻 Francisco Sorkin
-Frontend Developer (React) & Python
+🧑‍💻 Francisco Sorkin
+
+Fronted Developer React , Python
 
 Firebase Realtime Database design
 
@@ -168,23 +166,7 @@ cd planora
 bash
 Copiar código
 npm install
-3. Environment variables
-Create a .env file in the root of the project and add the following variables:
-
-env
-Copiar código
-VITE_FB_API_KEY=your_firebase_api_key
-VITE_FB_AUTH_DOMAIN=your_firebase_auth_domain
-VITE_FB_DATABASE_URL=your_firebase_database_url
-VITE_FB_PROJECT_ID=your_firebase_project_id
-VITE_FB_APP_ID=your_firebase_app_id
-These credentials can be obtained by creating a Firebase project and enabling Realtime Database and Authentication.
-
-4. Run the application
-bash
-Copiar código
 npm run dev
-The app will be available at http://localhost:5173
 
 📄 License
 This project is for educational and portfolio purposes.
